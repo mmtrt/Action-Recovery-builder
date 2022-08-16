@@ -14,7 +14,7 @@ on:
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
-        default: 'https://github.com/mmtrt/twrp_device_xiaomi_evergreen'
+        default: 'https://github.com/mmtrt/android_device_xiaomi_evergreen'
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
