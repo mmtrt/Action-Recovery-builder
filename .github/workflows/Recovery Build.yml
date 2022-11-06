@@ -6,11 +6,11 @@ on:
       MANIFEST_URL:
         description: 'MANIFEST_URL (if want to use SSH keys, use git@github.com:XXXXX)'
         required: true
-        default: 'https://github.com/PitchBlackRecoveryProject/manifest_pb'
+        default: 'https://github.com/SHRP/manifest'
       MANIFEST_BRANCH:
         description: 'MANIFEST_BRANCH'
         required: true
-        default: 'android-12.1'
+        default: 'shrp-12.1'
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
@@ -18,7 +18,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
-        default: 'pbrp'
+        default: 'shrp'
       DEVICE_PATH:
         description: 'DEVICE_PATH'
         required: true
@@ -36,7 +36,7 @@ on:
       MAKEFILE_NAME:
         description: 'MAKEFILE_NAME'
         required: true
-        default: 'omni_evergreen'
+        default: 'twrp_evergreen'
       BUILD_TARGET:
         description: 'BUILD_TARGET'
         required: true
