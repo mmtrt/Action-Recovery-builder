@@ -162,6 +162,14 @@ jobs:
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.pwd }}
 
+    - name: Patch boot.img
+      run: |
+        sudo apt install -y git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-11-jdk gcc g++ python3 python-is-python3 p7zip-full
+        git clone https://github.com/cfig/Android_boot_image_editor.git
+        cp workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img Android_boot_image_editor
+        cd Android_boot_image_editor ; chmod +x gradlew ; ./gradlew unpack ; sed -i 's|twrpfastboot=1 ||;s|-99.87.36|12.0.0|' build/unzip_boot/boot.json
+        ./gradlew pack ; rm boot.img ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img ; cp boot.img.signed ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/boot.img ; cd .. ; rm -rf Android_boot_image_editor
+
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
