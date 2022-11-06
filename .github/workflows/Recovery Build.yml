@@ -18,7 +18,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
-        default: 'pbrp'
+        default: 'pbrp-12.1'
       DEVICE_PATH:
         description: 'DEVICE_PATH'
         required: true
