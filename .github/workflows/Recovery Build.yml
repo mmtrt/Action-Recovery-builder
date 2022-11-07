@@ -168,7 +168,7 @@ jobs:
         wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
         7z x boot_editor_v13_preview3.zip
         cp workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img boot_editor_v13_preview3
-        cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ; sed -i 's|twrpfastboot=1 ||;s|-99.87.36|12.0.0|' build/unzip_boot/boot.json
+        cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ; cat build/unzip_boot/boot.json ; sed -i 's|twrpfastboot=1 ||;s|-99.87.36|12.0.0|' build/unzip_boot/boot.json ; cat build/unzip_boot/boot.json
         ./gradlew pack ; rm boot.img ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img ; cp boot.img.signed ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/boot.img ; cd .. ; rm -rf boot_editor_v13_preview3 boot_editor_v13_preview3.zip
 
     - name: Upload to Release
