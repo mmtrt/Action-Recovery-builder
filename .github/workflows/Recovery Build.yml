@@ -164,7 +164,6 @@ jobs:
 
     - name: Patch boot.img
       run: |
-        sudo apt-mark hold python-is-python2 python2
         sudo apt -y install git device-tree-compiler lz4 xz-utils zlib1g-dev gcc g++ python3 python-is-python3 p7zip-full wget
         wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
         7z x boot_editor_v13_preview3.zip
