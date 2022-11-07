@@ -79,7 +79,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '8'
+        java-version: '11'
 
     - name: Setup SSH Keys
       if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
@@ -161,6 +161,16 @@ jobs:
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.pwd }}
+
+    - name: Patch boot.img
+      run: |
+        sudo apt-mark hold python-is-python2 python2
+        sudo apt -y install git device-tree-compiler lz4 xz-utils zlib1g-dev gcc g++ python3 python-is-python3 p7zip-full wget
+        wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
+        7z x boot_editor_v13_preview3.zip
+        cp workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img boot_editor_v13_preview3
+        cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ; cat build/unzip_boot/boot.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ;
+        ./gradlew pack ; rm boot.img ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img ; cp boot.img.signed ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/boot.img ; cd .. ; rm -rf boot_editor_v13_preview3 boot_editor_v13_preview3.zip
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
