@@ -6,11 +6,11 @@ on:
       MANIFEST_URL:
         description: 'MANIFEST_URL (if want to use SSH keys, use git@github.com:XXXXX)'
         required: true
-        default: 'https://github.com/SHRP/manifest'
+        default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp'
       MANIFEST_BRANCH:
         description: 'MANIFEST_BRANCH'
         required: true
-        default: 'shrp-12.1'
+        default: 'twrp-12.1'
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
@@ -18,7 +18,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
-        default: 'shrp-12.1'
+        default: 'vib'
       DEVICE_PATH:
         description: 'DEVICE_PATH'
         required: true
@@ -45,7 +45,7 @@ on:
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     # You can use either of the ubuntu-18.04 or ubuntu-20.04 runner
     steps:
     - name: Display Run Parameters
@@ -72,14 +72,14 @@ jobs:
     - name: Prepare the environment
       run: |
         sudo apt update
-        sudo apt-mark hold python-is-python2 python2 snapd firefox
-        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev  git device-tree-compiler lz4 xz-utils zlib1g-dev gcc g++ python3 python-is-python3 p7zip-full wget
+        sudo apt -y upgrade
+        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev python
 
     - name: Install OpenJDK
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '8'
 
     - name: Setup SSH Keys
       if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
@@ -152,7 +152,7 @@ jobs:
       if: ${{ github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1' }}
       run: |
         source build/envsetup.sh
-        repopick 5405 5540
+        repopick 5405 5540 5675 5691 5694 5696 
       working-directory: ${{ steps.pwd.outputs.pwd }}
 
     - name: Building recovery
@@ -161,15 +161,6 @@ jobs:
         export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
       working-directory: ${{ steps.pwd.outputs.pwd }}
-
-    - name: Patch boot.img
-      run: |
-        
-        wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
-        7z x boot_editor_v13_preview3.zip
-        cp workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img boot_editor_v13_preview3
-        cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ; cat build/unzip_boot/boot.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ;
-        ./gradlew pack ; rm boot.img ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img ; cp boot.img.signed ../workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/boot.img ; cd .. ; rm -rf boot_editor_v13_preview3 boot_editor_v13_preview3.zip
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
