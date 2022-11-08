@@ -69,8 +69,8 @@ jobs:
         7z x boot_editor_v13_preview3.zip
         cp boot.img boot_editor_v13_preview3
         cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ;
-        cat build/unzip_boot/boot.json ; cp build/unzip_boot/boot.json build/unzip_boot/b.json
-        cat build/unzip_boot/b.json | sed -i 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json
+        cp build/unzip_boot/boot.json build/unzip_boot/b.json
+        cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json
         cat build/unzip_boot/boot.json ; ./gradlew pack ; ls -al
 
     # - name: Upload to Release
