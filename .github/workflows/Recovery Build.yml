@@ -68,7 +68,10 @@ jobs:
         wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3404551841/boot.img"
         7z x boot_editor_v13_preview3.zip
         cp boot.img boot_editor_v13_preview3
-        cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ; cat build/unzip_boot/boot.json ; cat build/unzip_boot/boot.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; cat build/unzip_boot/boot.json ; cat build/unzip_boot/boot.json ; ./gradlew pack ; ls -al
+        cd boot_editor_v13_preview3 ; chmod +x gradlew ; ./gradlew unpack ;
+        cat build/unzip_boot/boot.json ;
+        sed -i 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' build/unzip_boot/boot.json ;
+        cat build/unzip_boot/boot.json ; ./gradlew pack ; ls -al
 
     # - name: Upload to Release
     #   uses: softprops/action-gh-release@v1
