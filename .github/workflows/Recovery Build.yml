@@ -45,7 +45,7 @@ on:
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     # You can use either of the ubuntu-18.04 or ubuntu-20.04 runner
     steps:
     - name: Display Run Parameters
@@ -64,94 +64,108 @@ jobs:
     # You might want to Checkout your repo first, but not mandatory
     - name: Check Out
       uses: actions/checkout@v3
-    # Cleanup The Actions Workspace Using Custom Composite Run Actions
-    - name: Cleanup
-      uses: rokibhasansagar/slimhub_actions@main
-      # That's it! Now use your normal steps
 
     - name: Prepare the environment
       run: |
         sudo apt update
-        sudo apt -y upgrade
-        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev python
+        sudo apt-mark hold python-is-python2 python2 snapd firefox
+        sudo apt -y install gperf liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev  git device-tree-compiler lz4 xz-utils zlib1g-dev gcc g++ python3 python-is-python3 p7zip-full wget
 
     - name: Install OpenJDK
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
-        java-version: '8'
+        java-version: '11'
 
-    - name: Setup SSH Keys
-      if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-          ssh-private-key: |
-              ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Install repo
+    - name: Get required deps
       run: |
-        mkdir ~/bin
-        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-        chmod a+x ~/bin/repo
-        sudo ln -sf ~/bin/repo /usr/bin/repo
-      
-    - name: Initialize repo
-      run: |
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3426674342/boot.img" -O twrp.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3426557023/boot.img" -O pbrp.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3426427519/boot.img" -O shrp.img
+        wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
+        7z x boot_editor_v13_preview3.zip
         mkdir workspace
-        cd workspace
-        echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
-        git config --global user.name "Captain Throwback"
-        git config --global user.email "captainthrowback@hotmail.com"
-        repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
-      id: pwd
-          
-    - name: Repo Sync
-      run: |
-        repo sync -j$(nproc --all) --force-sync
-      working-directory: workspace
-      
-    - name: Clone device tree
-      run: |
-        git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
-    - name: Clone common tree
-      if: |
-        github.event.inputs.COMMON_TREE_URL != null
-        && github.event.inputs.COMMON_PATH != null
+    - name: Patch pbrp eea boot.img
       run: |
-        git clone ${{ github.event.inputs.COMMON_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.COMMON_PATH }}
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+        cp pbrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_eea build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/pbrp-eea.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
-    - name: Check Build Tree
-      uses: haya14busa/action-cond@v1
-      id: buildtree
-      with:
-        cond: ${{ github.event.inputs.MANIFEST_BRANCH == 'twrp-11' || github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1' }}
-        if_true: twrp
-        if_false: omni
-
-    - name: Set Swap Space
-      uses: pierotofy/set-swap-space@master
-      with:
-        swap-size-gb: 12
-
-    - name: Building recovery
+    - name: Patch shrp eea boot.img
       run: |
-        source build/envsetup.sh
-        export ALLOW_MISSING_DEPENDENCIES=true
-        lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+        cp shrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_eea build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/shrp-eea.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch twrp eea boot.img
+      run: |
+        cp twrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_eea build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-eea.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch pbrp tur boot.img
+      run: |
+        cp pbrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tur build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/pbrp-tur.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch shrp tur boot.img
+      run: |
+        cp shrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tur build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/shrp-tur.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch twrp tur boot.img
+      run: |
+        cp twrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tur build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-tur.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch pbrp tw boot.img
+      run: |
+        cp pbrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tw build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/pbrp-tw.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch shrp tw boot.img
+      run: |
+        cp shrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tw build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/shrp-tw.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch twrp tw boot.img
+      run: |
+        cp twrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tw build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-tw.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch pbrp ru boot.img
+      run: |
+        cp pbrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_ru build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/pbrp-ru.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch shrp ru boot.img
+      run: |
+        cp shrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_ru build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/shrp-ru.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch twrp ru boot.img
+      run: |
+        cp twrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_ru build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-ru.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
-        files: workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-        name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+        files: workspace/*.img
+        name: evergreen-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
         body: |
-          Manifest: ${{ github.event.inputs.MANIFEST_BRANCH }}
-          Device: ${{ github.event.inputs.DEVICE_NAME }}
-          Target: ${{ github.event.inputs.BUILD_TARGET }}.img
+          Version: MIUI V13.0.2.0 A12
+          Region: EEA TUR TW RU
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
