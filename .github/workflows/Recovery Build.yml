@@ -82,6 +82,7 @@ jobs:
         wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3426674342/boot.img" -O twrp.img
         wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3426557023/boot.img" -O pbrp.img
         wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3426427519/boot.img" -O shrp.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3454575570/boot.img" -O ofox.img
         wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
         7z x boot_editor_v13_preview3.zip
         mkdir workspace
@@ -104,6 +105,12 @@ jobs:
         cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
         ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_eea build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-eea.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
+    - name: Patch ofox eea boot.img
+      run: |
+        cp ofox.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|ofoxfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_eea build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/ofox-eea.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
     - name: Patch pbrp tur boot.img
       run: |
         cp pbrp.img boot_editor_v13_preview3/boot.img
@@ -121,6 +128,12 @@ jobs:
         cp twrp.img boot_editor_v13_preview3/boot.img
         cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
         ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tur build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-tur.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch ofox tur boot.img
+      run: |
+        cp ofox.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|ofoxfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tur build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/ofox-tur.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
     - name: Patch pbrp tw boot.img
       run: |
@@ -140,6 +153,12 @@ jobs:
         cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
         ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tw build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-tw.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
+    - name: Patch ofox tw boot.img
+      run: |
+        cp ofox.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|ofoxfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_tw build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/ofox-tw.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
     - name: Patch pbrp ru boot.img
       run: |
         cp pbrp.img boot_editor_v13_preview3/boot.img
@@ -157,6 +176,12 @@ jobs:
         cp twrp.img boot_editor_v13_preview3/boot.img
         cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
         ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_ru build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-ru.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch ofox ru boot.img
+      run: |
+        cp ofox.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|ofoxfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_ru build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/ofox-ru.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
