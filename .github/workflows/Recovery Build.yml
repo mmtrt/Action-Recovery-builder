@@ -79,10 +79,10 @@ jobs:
 
     - name: Get required deps
       run: |
-        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3454574178/boot.img" -O twrp.img
-        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3454575569/boot.img" -O pbrp.img
-        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3454574872/boot.img" -O shrp.img
-        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3454575570/boot.img" -O ofox.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3658321298/boot.img" -O twrp.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3658322242/boot.img" -O pbrp.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3658323676/boot.img" -O shrp.img
+        wget -q "https://github.com/mmtrt/Action-Recovery-builder/releases/download/3658324979/boot.img" -O ofox.img
         wget -q "https://github.com/cfig/Android_boot_image_editor/releases/download/v13_preview3/boot_editor_v13_preview3.zip"
         7z x boot_editor_v13_preview3.zip
         mkdir workspace
