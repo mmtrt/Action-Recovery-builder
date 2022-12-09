@@ -111,6 +111,30 @@ jobs:
         cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
         ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|ofoxfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_eea build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/ofox-eea.img ; rm -r build/unzip_boot ; rm boot.img.signed
 
+    - name: Patch pbrp glo boot.img
+      run: |
+        cp pbrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_glo build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/pbrp-glo.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch shrp glo boot.img
+      run: |
+        cp shrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_glo build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/shrp-glo.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch twrp glo boot.img
+      run: |
+        cp twrp.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|twrpfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_glo build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/twrp-glo.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
+    - name: Patch ofox glo boot.img
+      run: |
+        cp ofox.img boot_editor_v13_preview3/boot.img
+        cd boot_editor_v13_preview3 || exit ; chmod +x gradlew ;
+        ./gradlew unpack ; cp build/unzip_boot/boot.json build/unzip_boot/b.json ; cat build/unzip_boot/b.json | sed -r 's|ofoxfastboot=1 ||;s/-[0-9]+\./12./;s/12.[0-9]+\./12.0./;s/12.0.[0-9]+/12.0.0/' &> build/unzip_boot/boot.json ; rm build/unzip_boot/b.json ; rm build/unzip_boot/kernel ; cp ../kernels/kernel_glo build/unzip_boot/kernel ; ./gradlew pack ; rm boot.img ; cp boot.img.signed ../workspace/ofox-glo.img ; rm -r build/unzip_boot ; rm boot.img.signed
+
     - name: Patch pbrp tur boot.img
       run: |
         cp pbrp.img boot_editor_v13_preview3/boot.img
@@ -192,5 +216,8 @@ jobs:
         body: |
           Version: MIUI V13.0.2.0 A12
           Region: EEA TUR TW RU
+
+          Version: MIUI V13.0.3.0 A12
+          Region: GLOBAL
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
