@@ -136,6 +136,13 @@ jobs:
       with:
         swap-size-gb: 12
 
+    - name: Check Build Branch
+      if: ${{ github.event.inputs.MANIFEST_BRANCH == 'twrp-11' }}
+      run: |
+        source build/envsetup.sh
+        repopick 6123 6126
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+
     - name: Building recovery
       run: |
         source build/envsetup.sh
